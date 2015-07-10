@@ -117,8 +117,8 @@ class Xcode
     `xcode-select -print-path`.strip
   end
 
-  def self.build_dir(effective_platform_name = "")
-    File.join(BUILD_DIR, CONFIGURATION + effective_platform_name)
+  def self.build_dir(effective_platform_name = "", configuration = nil)
+    File.join(BUILD_DIR, (configuration || CONFIGURATION) + effective_platform_name)
   end
 
   def self.sdk_dir_for_version(version)
@@ -145,9 +145,10 @@ class Xcode
     args += " -target #{options[:target].inspect}" if options[:target]
     args += " -sdk #{options[:sdk].inspect}" if options[:sdk]
     args += " -scheme #{options[:scheme].inspect}" if options[:scheme]
+    args += " -configuration #{options[:configuration] || CONFIGURATION}"
 
     Shell.fold "build.#{options[:scheme] || options[:target]}" do
-      Shell.run(%Q(xcodebuild -project #{PROJECT_NAME}.xcodeproj -configuration #{CONFIGURATION} SYMROOT=#{BUILD_DIR.inspect} clean build #{args}), logfile)
+      Shell.run(%Q(xcodebuild -project #{PROJECT_NAME}.xcodeproj SYMROOT=#{BUILD_DIR.inspect} clean build #{args}), logfile)
     end
   end
 
@@ -210,6 +211,9 @@ class Simulator
       begin
         kill # ensure simulator is not currently running
         Shell.run "ios-sim launch #{File.join(app_dir, "#{app_name}.app").inspect} --devicetypeid \"com.apple.CoreSimulator.SimDeviceType.iPhone-5s, #{SDK_RUNTIME_VERSION}\" --verbose --stdout build/uispecs.spec.log"
+        puts "** cat: **"
+        system("cat build/uispecs.spec.log")
+        puts "**done**"
         Shell.run "grep -q ', 0 failures' build/uispecs.spec.log", logfile
       rescue
         retry_count += 1
@@ -334,7 +338,7 @@ namespace :suites do
 
     desc "Build UI specs"
     task :build do
-      Xcode.build(target: UI_SPECS_TARGET_NAME, sdk: "iphonesimulator#{SDK_VERSION}", args: 'ARCHS=i386', logfile: "uispecs.build.log")
+      Xcode.build(target: UI_SPECS_TARGET_NAME, sdk: "iphonesimulator#{SDK_VERSION}", args: 'ARCHS=i386', configuration: "Debug", logfile: "uispecs.build.log")
     end
 
     desc "Run UI specs"
@@ -345,7 +349,7 @@ namespace :suites do
       }
 
       Shell.with_env(env_vars) do
-        Simulator.launch(Xcode.build_dir("-iphonesimulator"), UI_SPECS_TARGET_NAME, "uispecs.run.log")
+        Simulator.launch(Xcode.build_dir("-iphonesimulator", "Debug"), UI_SPECS_TARGET_NAME, "uispecs.run.log")
       end
     end
   end
@@ -416,7 +420,7 @@ namespace :suites do
 
     desc "Build iOS dynamic framework specs"
     task :build do
-      Xcode.build(target: IOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, sdk: "iphonesimulator#{SDK_VERSION}", args: 'ARCHS=i386', logfile: "frameworks.ios.dynamic.specs.build.log")
+      Xcode.build(target: IOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, sdk: "iphonesimulator#{SDK_VERSION}", args: 'ARCHS=i386', configuration: "Debug", logfile: "frameworks.ios.dynamic.specs.build.log")
     end
 
     desc "Runs iOS dynamic framework specs"
@@ -427,7 +431,7 @@ namespace :suites do
       }
 
       Shell.with_env(env_vars) do
-        Simulator.launch(Xcode.build_dir("-iphonesimulator"), IOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, "frameworks.ios.dynamic.specs.run.log")
+        Simulator.launch(Xcode.build_dir("-iphonesimulator", "Debug"), IOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, "frameworks.ios.dynamic.specs.run.log")
       end
     end
   end
