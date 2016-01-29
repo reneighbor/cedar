@@ -116,7 +116,7 @@ namespace :suites do
   task iosdynamicframeworkspecs: ['iosdynamicframeworkspecs:analyze', 'iosdynamicframeworkspecs:run']
 
   namespace :iosdynamicframeworkspecs do
-    desc "Analyzes ios dynamic framework specs"
+    desc "Analyzes iOS dynamic framework specs"
     task :analyze do
       Xcode.analyze(target: IOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, sdk: "iphonesimulator#{SDK_VERSION}", args: 'ARCHS=i386 '+Xcode.swift_build_settings, logfile: "frameworks.ios.dynamic.specs.analyze.log")
     end
@@ -138,4 +138,33 @@ namespace :suites do
       end
     end
   end
+
+  desc "Analyzes and runs watchos dynamic framework specs"
+  task watchosdynamicframeworkspecs: ['watchosdynamicframeworkspecs:analyze', 'watchosdynamicframeworkspecs:run']
+
+  namespace :watchosdynamicframeworkspecs do
+    desc "Analyzes watchOS dynamic framework specs"
+    task :analyze do
+      Xcode.analyze(target: WATCHOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, sdk: "watchsimulator#{WATCH_SDK_VERSION}", args: 'ARCHS=i386 '+Xcode.swift_build_settings, logfile: "frameworks.watchos.dynamic.specs.analyze.log")
+    end
+
+    desc "Build watchOS dynamic framework specs"
+    task :build do
+      Xcode.build(target: WATCHOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME, sdk: "watchsimulator#{WATCH_SDK_VERSION}", args: 'ARCHS=i386 '+Xcode.swift_build_settings, logfile: "frameworks.watchos.dynamic.specs.build.log")
+    end
+
+    # TODO: https://www.pivotaltracker.com/story/show/111396046
+    desc "Runs watchOS dynamic framework specs"
+    task run: :build do
+      Simulator.kill
+      env_vars = {
+          "CEDAR_REPORTER_CLASS" => "CDRColorizedReporter",
+      }
+
+      Shell.with_env(env_vars) do
+        Raise "not implemented"
+      end
+    end
+  end
+
 end

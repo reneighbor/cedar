@@ -7,6 +7,7 @@ UI_SPECS_TARGET_NAME = "Cedar-iOS StaticLib Specs"
 FOCUSED_SPECS_TARGET_NAME = "Cedar-OSX FocusedSpecs"
 IOS_STATIC_FRAMEWORK_SPECS_TARGET_NAME = "Cedar-iOS StaticFrameworkSpecs"
 IOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME = "Cedar-iOS Specs"
+WATCHOS_DYNAMIC_FRAMEWORK_SPECS_TARGET_NAME = "Cedar-watchOS Specs"
 
 IOS_SPEC_BUNDLE_SCHEME_NAME = "Cedar-iOS SpecBundle"
 
@@ -25,6 +26,10 @@ XCODE_PLUGINS_DIR = "#{ENV['HOME']}/Library/Application Support/Developer/Shared
 LATEST_SDK_VERSION = `xcodebuild -showsdks 2>/dev/null | grep iphonesimulator | cut -d ' ' -f 4`.chomp.split("\n").last
 SDK_VERSION = ENV["CEDAR_SDK_VERSION"] || LATEST_SDK_VERSION
 SDK_RUNTIME_VERSION = ENV["CEDAR_SDK_RUNTIME_VERSION"] || LATEST_SDK_VERSION
+
+LATEST_WATCH_SDK_VERSION = `xcodebuild -showsdks 2>/dev/null | grep watchsimulator | cut -d ' ' -f 4`.chomp.split("\n").last
+WATCH_SDK_VERSION = LATEST_WATCH_SDK_VERSION #ENV["CEDAR_SDK_VERSION"] || LATEST_WATCH_SDK_VERSION
+WATCH_SDK_RUNTIME_VERSION = LATEST_WATCH_SDK_VERSION #ENV["CEDAR_SDK_RUNTIME_VERSION"] || LATEST_WATCH_SDK_VERSION
 
 PROJECT_ROOT = File.dirname(__FILE__)
 BUILD_DIR = File.join(PROJECT_ROOT, "build")
